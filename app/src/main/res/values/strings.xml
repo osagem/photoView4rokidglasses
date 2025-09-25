@@ -3,4 +3,5 @@
     <string name="app_name">photoView4rokidglasses</string>
     <string name="button_enterApp">Enter</string>
     <string name="button_exitApp">Exit</string>
+    <string name="main_slogan">view or del Photo</string>
 </resources>

@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         // 设置点击监听器
         buttonExitApp.setOnClickListener {
             // 调用 finishAndRemoveTask() 方法结束当前 Activity 所属的整个任务（Task），并且从“最近任务列表”（Recents screen）中移除这个任务。
-            finishAndRemoveTask()
+            finishAndRemoveTask()//rokidglasses眼睛端资源有限，彻底退出能释放占用资源防止系统崩溃
         }
     }
 }

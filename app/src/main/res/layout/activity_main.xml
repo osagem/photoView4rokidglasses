@@ -9,10 +9,11 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/main_slogan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/black"
-        android:text="Hello Gem"
+        android:text="@string/main_slogan"
         android:textColor="@color/rgrcolor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,7 +25,7 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter"
+        android:text="@string/button_enterApp"
         android:textColor="@color/rgrcolor"
         app:cornerRadius="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -40,7 +41,7 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Exit"
+        android:text="@string/button_exitApp"
         android:textColor="@color/rgrcolor"
         app:cornerRadius="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
