@@ -5,4 +5,6 @@
     <string name="button_exitApp">退出</string>
     <string name="main_slogan">可以在此查看、删除照片\nv0.1 by osagem</string>
     <string name="button_nextPhoto">下一张</string>
+    <string name="button_backMain">返回</string>
+    <string name="photo_count_format">%1$d / %2$d</string>
 </resources>

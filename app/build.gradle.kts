@@ -45,4 +45,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+// Check for the latest version
+// annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0' // If using Java
+// For Kotlin, if you use Glide's generated API (optional, not used in this example)
+// ksp 'com.github.bumptech.glide:ksp:4.16.0'
 }
