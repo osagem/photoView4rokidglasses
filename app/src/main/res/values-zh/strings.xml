@@ -4,4 +4,5 @@
     <string name="button_enterApp">进入</string>
     <string name="button_exitApp">退出</string>
     <string name="main_slogan">可以在此查看、删除照片\nv0.1 by osagem</string>
+    <string name="button_nextPhoto">下一张</string>
 </resources>

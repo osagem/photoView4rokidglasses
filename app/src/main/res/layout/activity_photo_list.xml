@@ -19,4 +19,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonNext"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_nextPhoto"
+        android:textColor="@color/rgrcolor"
+        android:visibility="gone"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.767"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.686"
+        app:strokeColor="@color/rgrcolor"
+        tools:visibility="visible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

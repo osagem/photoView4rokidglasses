@@ -12,17 +12,22 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import java.io.File
+import android.content.Intent // 需要导入 Intent 以便可以返回 MainActivity
 
 
 class PhotoListActivity : AppCompatActivity() {
 
     private lateinit var latestImageView: ImageView
+    private lateinit var buttonNext: MaterialButton
+
     private val cameraDirectoryPath = File(
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
         "Camera"
@@ -50,6 +55,7 @@ class PhotoListActivity : AppCompatActivity() {
             insets
         }
         latestImageView = findViewById(R.id.latestImageView)
+        buttonNext = findViewById(R.id.buttonNext)
 
         checkAndRequestPermission()
     }
@@ -88,6 +94,7 @@ class PhotoListActivity : AppCompatActivity() {
 
         if (ContextCompat.checkSelfPermission(this, permissionToCheck) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Error: loadLatestImage called without required permission.", Toast.LENGTH_LONG).show()
+            finish() // 添加 finish()
             return
         }
 
@@ -133,10 +140,12 @@ class PhotoListActivity : AppCompatActivity() {
                 if (cursor.count == 0) { // 检查游标是否有行
                     Toast.makeText(
                         this,
-                        "No photos found in Camera directory via MediaStore.",
-                        Toast.LENGTH_SHORT
+                        "No photos found in Camera directory. Returning to main screen.",
+                        Toast.LENGTH_LONG
                     ).show()
-                    latestImageView.setImageResource(android.R.color.transparent) // 或者一个占位图
+                    //latestImageView.setImageResource(android.R.color.transparent) // 或者一个占位图
+                    //buttonNext.visibility = View.GONE // 隐藏按钮
+                    finish() // 添加 finish() 以返回主视图
                     return@use
                 }
                 if (cursor.moveToFirst()) {
@@ -147,22 +156,29 @@ class PhotoListActivity : AppCompatActivity() {
                         id
                     )
                     latestImageView.setImageURI(contentUri)
+                    buttonNext.visibility = View.VISIBLE // 显示按钮
                 } else {
                     Toast.makeText(
                         this,
-                        "No photos found in Camera directory.", // 此处可以更具体
-                        Toast.LENGTH_SHORT
+                        "No photos found in Camera directory. Returning to main screen.", // 修改 Toast 信息
+                        Toast.LENGTH_LONG
                     ).show()
-                    latestImageView.setImageResource(android.R.color.transparent) // 清空或设置占位符
+                    //latestImageView.setImageResource(android.R.color.transparent) // 清空或设置占位符
+                    //buttonNext.visibility = View.GONE // 隐藏按钮
+                    finish() // 添加 finish() 以返回主视图
                 }
             } ?: run {
-                Toast.makeText(this, "Could not query MediaStore (query returned null)", Toast.LENGTH_SHORT).show()
-                latestImageView.setImageResource(android.R.color.transparent)
+                Toast.makeText(this, "Could not query MediaStore. Returning to main screen.", Toast.LENGTH_LONG).show()
+                //latestImageView.setImageResource(android.R.color.transparent)
+                //buttonNext.visibility = View.GONE // 隐藏按钮
+                finish() // 添加 finish() 以返回主视图
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "Error loading image: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-            e.printStackTrace() // For debugging
-            latestImageView.setImageResource(android.R.color.transparent)
+            Toast.makeText(this, "Error loading image: ${e.localizedMessage}. Returning to main screen.", Toast.LENGTH_LONG).show() // 修改 Toast 信息
+            e.printStackTrace()
+            //latestImageView.setImageResource(android.R.color.transparent)
+            //buttonNext.visibility = View.GONE // 隐藏按钮
+            finish() // 添加 finish() 以返回主视图
         }
     }
 }

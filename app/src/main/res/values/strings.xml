@@ -4,4 +4,5 @@
     <string name="button_enterApp">Enter</string>
     <string name="button_exitApp">Exit</string>
     <string name="main_slogan">u can view or del Photo\nv0.1 by osagem</string>
+    <string name="button_nextPhoto">Next</string>
 </resources>
