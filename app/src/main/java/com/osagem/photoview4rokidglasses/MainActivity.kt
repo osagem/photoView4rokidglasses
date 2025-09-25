@@ -13,13 +13,14 @@ import android.os.Looper
 import android.widget.TextView // 导入 TextView
 import android.view.View // 导入 View
 import android.animation.ObjectAnimator // 导入 ObjectAnimator
+import android.content.Intent // 给enter按钮添加打开照片列表功能
 class MainActivity : AppCompatActivity() {
 
     //添加text的打字机逐个字符显示效果
     private lateinit var sloganTextView: TextView
     private val fullSloganText: String by lazy { getString(R.string.main_slogan) }
     private var sloganIndex = 0
-    private val typingDelay = 150L // 每个字符显示的延迟时间 (毫秒)
+    private val typingDelay = 60L // 每个字符显示的延迟时间 (毫秒)
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var typeRunnable: Runnable
 
@@ -60,6 +61,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         startTypingEffect()
+
+        // Set OnClickListener for buttonEnter
+        buttonEnter.setOnClickListener {
+            val intent = Intent(this, PhotoListActivity::class.java)
+            startActivity(intent)
+        }
 
         buttonExitApp.setOnClickListener {
             finishAndRemoveTask()
