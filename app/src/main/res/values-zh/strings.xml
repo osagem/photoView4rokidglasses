@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">photoView4rokidglasses</string>
-    <string name="button_enterApp">Enter</string>
-    <string name="button_exitApp">Exit</string>
+    <string name="button_enterApp">进入</string>
+    <string name="button_exitApp">退出</string>
 </resources>
