@@ -8,4 +8,27 @@
     <string name="button_backMain">返回</string>
     <string name="photo_count_format">%1$d / %2$d</string>
     <string name="button_delPhoto">删除</string>
+    <string name="toast_permission_Denied">读取权限被禁止</string>
+    <string name="toast_write_permission_granted">已获取权限，请再次尝试</string>
+    <string name="toast_write_permission_denied">写入权限被禁止</string>
+    <string name="toast_photo_deleted_succe">照片删除成功</string>
+    <string name="toast_photo_deletion_cancelled_failed">照片删除中止</string>
+    <string name="toast_no_photo_selected_to_del">没有照片删除</string>
+    <string name="toast_need_permissions_show_manage_photo">需要获取权限才能查看编辑照片</string>
+    <string name="toast_read_permission_denied">读取权限被禁止，无法加载照片</string>
+    <string name="toast_write_permission_denied_on_older_sysver">写入权限被禁止，在旧版系统上可能会无法删除</string>
+    <string name="toast_no_image_to_del_or_index">没有照片可以删除，或索引越界</string>
+    <string name="toast_failed_to_delete_photo">删除照片失败，可能照片设置了保护或已经删除了</string>
+    <string name="toast_could_not_request_deletion">无法请求删除动作</string>
+    <string name="toast_deletion_failed_security_reasons">因安全原因删除失败</string>
+    <string name="toast_permission_needed">可能需要获取权限</string>
+    <string name="toast_deletion_failed_check_permissions">删除失败，请检查是否已获取权限</string>
+    <string name="toast_error_deleting_photo">删除照片出现错误</string>
+    <string name="toast_permissions_not_granted">错误原因：没有权限</string>
+    <string name="toast_cant_query_MediaStore">无法查询MediaStore</string>
+    <string name="toast_error_loading_images">加载照片出错</string>
+    <string name="toast_no_images_to_display">没有照片可以显示</string>
+    <string name="toast_reached_end_starting_over">已经到头了，已重新开始</string>
+    <string name="toast_error_accessing_photos">访问照片出错</string>
+    <string name="toast_no_photos_found">在Camera文件夹没有找到照片</string>
 </resources>
