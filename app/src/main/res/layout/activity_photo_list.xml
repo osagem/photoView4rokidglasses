@@ -20,56 +20,56 @@
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonNext"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_nextPhoto"
-        android:textColor="@color/rgrcolor"
-        android:visibility="gone"
-        app:cornerRadius="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.931"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        app:strokeColor="@color/rgrcolor"
-        tools:visibility="visible" />
-
-    <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonDelphoto"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        style="@style/Widget.App.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_delPhoto"
-        android:textColor="@color/rgrcolor"
+        android:textColor="@color/button_stroke_color_selector"
         android:visibility="gone"
-        app:cornerRadius="16dp"
+        app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        app:strokeColor="@color/rgrcolor"
+        app:layout_constraintVertical_bias="0.86"
+        app:strokeWidth="2px"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonBackmain"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        style="@style/Widget.App.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_backMain"
-        android:textColor="@color/rgrcolor"
+        android:textColor="@color/button_stroke_color_selector"
         android:visibility="gone"
-        app:cornerRadius="16dp"
+        app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.068"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        app:strokeColor="@color/rgrcolor"
+        app:layout_constraintVertical_bias="0.86"
+        app:strokeWidth="2px"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonNext"
+        style="@style/Widget.App.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_nextPhoto"
+        android:textColor="@color/button_stroke_color_selector"
+        android:visibility="gone"
+        app:cornerRadius="12px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.931"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.86"
+        app:strokeWidth="2px"
         tools:visibility="visible" />
 
     <TextView
@@ -77,7 +77,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:textSize="12sp"
         android:background="#80000000"
         android:padding="8dp"
         android:text="@string/photo_count_format"
@@ -87,5 +87,19 @@
         app:layout_constraintTop_toBottomOf="@id/buttonNext"
         app:layout_constraintVertical_bias="0.95"
         tools:text="1 / 10" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="80px" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top_160px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="160px" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

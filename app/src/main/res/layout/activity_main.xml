@@ -25,38 +25,58 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonEnter"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        style="@style/Widget.App.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_enterApp"
-        android:textColor="@color/rgrcolor"
+        android:textColor="@color/button_stroke_color_selector"
         android:visibility="gone"
-        app:cornerRadius="16dp"
+        app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.767"
+        app:layout_constraintHorizontal_bias="0.754"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        app:strokeColor="@color/rgrcolor"
+        app:layout_constraintVertical_bias="0.86"
+        app:strokeWidth="2px"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonExitapp"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        style="@style/Widget.App.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_exitApp"
-        android:textColor="@color/rgrcolor"
+        android:textColor="@color/button_stroke_color_selector"
         android:visibility="gone"
-        app:cornerRadius="16dp"
+        app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.267"
+        app:layout_constraintHorizontal_bias="0.245"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        app:strokeColor="@color/rgrcolor"
+        app:layout_constraintVertical_bias="0.86"
+        app:strokeWidth="2px"
         tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Barrier android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_bottom_80px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="80px" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top_160px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="160px" />
+
+    <androidx.constraintlayout.widget.Guideline android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
