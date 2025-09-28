@@ -5,9 +5,4 @@
     <color name="rgrcolor_normal">#6640FF5E</color>
     <color name="rgrcolor_selected">#CC40FF5E</color>
     <color name="rgrcolor_pressed">#FF40FF5E</color>
-    <!--
-    <color name="rgrcolor_normal">#9940FF5E</color>
-    <color name="rgrcolor_selected">#3340FF5E</color>
-    <color name="rgrcolor_pressed">#FF40FF5E</color>
-    -->
 </resources>
