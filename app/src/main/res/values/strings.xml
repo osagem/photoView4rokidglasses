@@ -26,7 +26,7 @@
     <string name="toast_error_deleting_photo">Error deleting photo</string>
     <string name="toast_permissions_not_granted">Error: Permissions not granted.</string>
     <string name="toast_cant_query_MediaStore">Could not query MediaStore.</string>
-    <string name="toast_error_loading_images">Error loading images</string>
+    <string name="toast_error_loading_images">Error loading images: %1$s</string>
     <string name="toast_no_images_to_display">No images to display.</string>
     <string name="toast_reached_end_starting_over">Reached end, starting over.</string>
     <string name="toast_error_accessing_photos">Error accessing photos.</string>

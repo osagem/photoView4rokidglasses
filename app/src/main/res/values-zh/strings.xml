@@ -26,7 +26,7 @@
     <string name="toast_error_deleting_photo">删除照片出现错误</string>
     <string name="toast_permissions_not_granted">错误原因：没有权限</string>
     <string name="toast_cant_query_MediaStore">无法查询MediaStore</string>
-    <string name="toast_error_loading_images">加载照片出错</string>
+    <string name="toast_error_loading_images">加载照片出错: %1$s</string>
     <string name="toast_no_images_to_display">没有照片可以显示</string>
     <string name="toast_reached_end_starting_over">已经到头了，已重新开始</string>
     <string name="toast_error_accessing_photos">访问照片出错</string>
