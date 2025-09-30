@@ -107,6 +107,12 @@ class MainActivity : AppCompatActivity() {
         // 为 buttonEnter 创建淡入动画
         ObjectAnimator.ofFloat(buttonEnter, "alpha", 0f, 1f).apply {
             duration = fadeInDuration
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    // 动画结束后，让 "进入" 按钮请求焦点
+                    buttonEnter.requestFocus()
+                }
+            })
             start()
         }
 
