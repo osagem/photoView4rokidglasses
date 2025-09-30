@@ -84,35 +84,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun startTypingEffect() {
+        // 为打字效果准备
         sloganIndex = 0 // 重置索引
         sloganTextView.text = "" // 清空文本，以便重新开始
-        buttonEnter.visibility = View.GONE
-        buttonExitApp.visibility = View.GONE
-        // 确保按钮在开始时完全透明，以便淡入效果从透明开始
-        buttonEnter.alpha = 0f
+        // 确保按钮和版本textview在开始时不可见和完全透明，以便淡入效果从透明开始
+        versionTextView.alpha = 0f
+        versionTextView.visibility = View.GONE
         buttonExitApp.alpha = 0f
+        buttonExitApp.visibility = View.GONE
+        buttonEnter.alpha = 0f
+        buttonEnter.visibility = View.GONE
         handler.postDelayed(typeRunnable, typingDelay)
     }
     private fun showButtonsWithFadeIn() {
-        // 先将按钮和版本号 TextView 设置为可见，但保持透明
-        buttonEnter.alpha = 0f
-        buttonEnter.visibility = View.VISIBLE
-
-        buttonExitApp.alpha = 0f
-        buttonExitApp.visibility = View.VISIBLE
-
-        versionTextView.alpha = 0f       // 将 versionTextView 设置为透明
+        // 将界面上两个按钮和一个版本TextView设置为可见，但保持透明
+        versionTextView.alpha = 0f
         versionTextView.visibility = View.VISIBLE // 然后设置为可见
+        buttonExitApp.alpha = 0f
+        buttonExitApp.visibility = View.VISIBLE // 然后设置为可见
+        buttonEnter.alpha = 0f
+        buttonEnter.visibility = View.VISIBLE // 然后设置为可见
 
-        // 为 buttonEnter 创建淡入动画
-        ObjectAnimator.ofFloat(buttonEnter, "alpha", 0f, 1f).apply {
+        // 为 versionTextView 创建淡入动画
+        ObjectAnimator.ofFloat(versionTextView, "alpha", 0f, 1f).apply {
             duration = fadeInDuration
-            addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) {
-                    // 动画结束后，让 "进入" 按钮请求焦点
-                    buttonEnter.requestFocus()
-                }
-            })
             start()
         }
 
@@ -122,12 +117,20 @@ class MainActivity : AppCompatActivity() {
             start()
         }
 
-        // 为 versionTextView 创建淡入动画
-        ObjectAnimator.ofFloat(versionTextView, "alpha", 0f, 1f).apply {
+        // 为 buttonEnter 创建淡入动画
+        ObjectAnimator.ofFloat(buttonEnter, "alpha", 0f, 1f).apply {
             duration = fadeInDuration
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    // 动画结束后，让 "进入" 按钮获得焦点，方便用户直接点击进入
+                    buttonEnter.requestFocus()
+                }
+            })
             start()
         }
+
     }
+
     override fun onDestroy() {
         super.onDestroy()
         // 移除回调以防止内存泄漏
