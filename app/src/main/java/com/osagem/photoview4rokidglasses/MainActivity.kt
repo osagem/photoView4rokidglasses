@@ -14,6 +14,8 @@ import android.widget.TextView // 导入 TextView
 import android.view.View // 导入 View
 import android.animation.ObjectAnimator // 导入 ObjectAnimator
 import android.content.Intent // 给enter按钮添加打开照片列表功能
+import com.osagem.photoview4rokidglasses.BuildConfig
+
 class MainActivity : AppCompatActivity() {
 
     //添加text的打字机逐个字符显示效果
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonEnter: MaterialButton
     private lateinit var buttonExitApp: MaterialButton
     private val fadeInDuration = 500L // 淡入动画的持续时间 (毫秒)
+    private lateinit var versionTextView: TextView // 将 versionTextView 声明为类成员变量
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +43,17 @@ class MainActivity : AppCompatActivity() {
 
         // 获取 TextView 实例
         sloganTextView = findViewById(R.id.main_slogan)
-
         buttonEnter = findViewById(R.id.buttonEnter)
         buttonExitApp = findViewById(R.id.buttonExitapp)
+        versionTextView = findViewById(R.id.main_version) // 初始化 versionTextView
+
+        // 1. 找到 main_version TextView
+        val versionTextView: TextView = findViewById(R.id.main_version)
+        // 2. 从自动生成的 BuildConfig 中获取版本名称
+        val versionName = BuildConfig.VERSION_NAME
+        // 3. 将版本名称设置到 TextView 的文本中
+        // 为了格式更清晰，你可以在前面加上 "v" 或 "Version "
+        versionTextView.text = "v$versionName by osagem"
 
         // 初始化时清空 TextView
         sloganTextView.text = ""
@@ -83,12 +94,15 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(typeRunnable, typingDelay)
     }
     private fun showButtonsWithFadeIn() {
-        // 先将按钮设置为可见，但保持透明
+        // 先将按钮和版本号 TextView 设置为可见，但保持透明
         buttonEnter.alpha = 0f
         buttonEnter.visibility = View.VISIBLE
 
         buttonExitApp.alpha = 0f
         buttonExitApp.visibility = View.VISIBLE
+
+        versionTextView.alpha = 0f       // 将 versionTextView 设置为透明
+        versionTextView.visibility = View.VISIBLE // 然后设置为可见
 
         // 为 buttonEnter 创建淡入动画
         ObjectAnimator.ofFloat(buttonEnter, "alpha", 0f, 1f).apply {
@@ -98,6 +112,12 @@ class MainActivity : AppCompatActivity() {
 
         // 为 buttonExitApp 创建淡入动画
         ObjectAnimator.ofFloat(buttonExitApp, "alpha", 0f, 1f).apply {
+            duration = fadeInDuration
+            start()
+        }
+
+        // 为 versionTextView 创建淡入动画
+        ObjectAnimator.ofFloat(versionTextView, "alpha", 0f, 1f).apply {
             duration = fadeInDuration
             start()
         }

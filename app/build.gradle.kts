@@ -7,12 +7,16 @@ android {
     namespace = "com.osagem.photoview4rokidglasses"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.osagem.photoview4rokidglasses"
         minSdk = 28
         targetSdk = 36
         versionCode = 3
-        versionName = "0.1.2"
+        versionName = "0.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

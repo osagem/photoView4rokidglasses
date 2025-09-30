@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">photoView4rokidglasses</string>
+    <string name="app_name">PhotoDel</string>
     <string name="button_enterApp">Enter</string>
     <string name="button_exitApp">Exit</string>
-    <string name="main_slogan">u can view or del Photo\nv0.1.1 by osagem</string>
+    <string name="main_slogan">u can view or del Photo</string>
     <string name="button_nextPhoto">Next</string>
     <string name="button_backMain">Back</string>
     <string name="photo_count_format">%1$d / %2$d</string>
