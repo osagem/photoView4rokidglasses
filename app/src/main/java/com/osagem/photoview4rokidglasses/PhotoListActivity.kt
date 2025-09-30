@@ -81,7 +81,8 @@ class PhotoListActivity : AppCompatActivity() {
                     // 用户已经授予权限，再次尝试删除
                     deleteCurrentImage()
                 } else {
-                    Toast.makeText(this, R.string.toast_photo_deletion_cancelled_failed, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, R.string.toast_photo_deletion_cancelled_failed, Toast.LENGTH_SHORT).show()
+                    showCenteredToast(getString(R.string.toast_photo_deletion_cancelled_failed))
                 }
             }
 
@@ -100,7 +101,8 @@ class PhotoListActivity : AppCompatActivity() {
             if (allImageUris.isNotEmpty() && currentImageIndex in allImageUris.indices) {
                 deleteCurrentImage()
             } else {
-                Toast.makeText(this, R.string.toast_no_photo_selected_to_del, Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, R.string.toast_no_photo_selected_to_del, Toast.LENGTH_SHORT).show()
+                showCenteredToast(getString(R.string.toast_no_photo_selected_to_del))
             }
         }
 
@@ -124,7 +126,8 @@ class PhotoListActivity : AppCompatActivity() {
                 if (permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
                     loadAllImageUrisFromCamera()
                 } else {
-                    Toast.makeText(this, R.string.toast_read_permission_denied, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, R.string.toast_read_permission_denied, Toast.LENGTH_SHORT).show()
+                    showCenteredToast(getString(R.string.toast_read_permission_denied))
                     finish()
                 }
             }.launch(permissionsToRequest.toTypedArray())
@@ -140,7 +143,8 @@ class PhotoListActivity : AppCompatActivity() {
             if (rowsDeleted > 0) {
                 handleDeletionSuccess(uriToDelete)
             } else {
-                Toast.makeText(this, R.string.toast_failed_to_delete_photo, Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, R.string.toast_failed_to_delete_photo, Toast.LENGTH_SHORT).show()
+                showCenteredToast(getString(R.string.toast_failed_to_delete_photo))
             }
         } catch (e: SecurityException) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -149,10 +153,12 @@ class PhotoListActivity : AppCompatActivity() {
                     val intentSender: IntentSender = recoverable.userAction.actionIntent.intentSender
                     deleteRequestLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
                 } else {
-                    Toast.makeText(this, R.string.toast_deletion_failed_security_reasons, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, R.string.toast_deletion_failed_security_reasons, Toast.LENGTH_SHORT).show()
+                    showCenteredToast(getString(R.string.toast_deletion_failed_security_reasons))
                 }
             } else {
-                Toast.makeText(this, R.string.toast_write_permission_granted, Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, R.string.toast_write_permission_granted, Toast.LENGTH_SHORT).show()
+                showCenteredToast(getString(R.string.toast_write_permission_granted))
             }
         }
     }
@@ -160,7 +166,8 @@ class PhotoListActivity : AppCompatActivity() {
     private fun handleDeletionSuccess(deletedUri: Uri? = null) {
         deletedUri?.let { debugLog("Deleted → $it") }
 
-        Toast.makeText(this, R.string.toast_photo_deleted_succe, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this, R.string.toast_photo_deleted_succe, Toast.LENGTH_SHORT).show()
+        showCenteredToast(getString(R.string.toast_photo_deleted_succe))
         allImageUris.removeAt(currentImageIndex)
         if (allImageUris.isEmpty()) {
             handleNoPhotosFound()
@@ -215,7 +222,8 @@ class PhotoListActivity : AppCompatActivity() {
                 handleNoPhotosFound()
             }
         } catch (e: Exception) {
-            Toast.makeText(this, getString(R.string.toast_error_loading_images, e.localizedMessage), Toast.LENGTH_LONG).show()
+            //Toast.makeText(this, getString(R.string.toast_error_loading_images, e.localizedMessage), Toast.LENGTH_LONG).show()
+            showCenteredToast(getString(R.string.toast_error_loading_images, e.localizedMessage), Toast.LENGTH_LONG)
             Log.e(TAG, "Error loading images", e)
             handleNoPhotosFound(true)
         }
@@ -261,11 +269,13 @@ class PhotoListActivity : AppCompatActivity() {
     }
 
     private fun handleNoPhotosFound(isError: Boolean = false) {
-        Toast.makeText(
-            this,
-            if (isError) getString(R.string.toast_error_accessing_photos) else getString(R.string.toast_no_photos_found),
-            Toast.LENGTH_LONG
-        ).show()
+        //Toast.makeText(
+        //    this,
+        //    if (isError) getString(R.string.toast_error_accessing_photos) else getString(R.string.toast_no_photos_found),
+        //    Toast.LENGTH_LONG
+        //).show()
+        val message = if (isError) getString(R.string.toast_error_accessing_photos) else getString(R.string.toast_no_photos_found)
+        showCenteredToast(message, Toast.LENGTH_LONG)
         allImageUris.clear()
         currentImageIndex = -1
         //latestImageView.setImageDrawable(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_gallery))
@@ -276,6 +286,18 @@ class PhotoListActivity : AppCompatActivity() {
         updatePhotoCountText()
         buttonBackmain.visibility = View.VISIBLE
     }
+
+    /**
+     * 创建并显示一个在屏幕中间的 Toast。
+     * @param message 要显示的消息文本。
+     * @param duration Toast 显示的时长 (Toast.LENGTH_SHORT 或 Toast.LENGTH_LONG)。
+     */
+    private fun showCenteredToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        val toast = Toast.makeText(this, message, duration)
+        toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+        toast.show()
+    }
+
     /**
      * 创建一个包含指定 Emoji 的 Bitmap。
      * @param emojiString 要显示的 Emoji 字符。
