@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.bumptech.glide.Glide
@@ -97,20 +98,12 @@ class PhotoListActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         // 绑定 PlayerView 和 ExoPlayer 这会创建视频渲染所需的 Surface
-        if (Build.VERSION.SDK_INT > 23) {
-            latestVideoView.player = exoPlayer
-        }
+        latestVideoView.player = exoPlayer
     }
 
     override fun onResume() {
         super.onResume()
-        // 旧版Android (API 23及以下)，在 onResume 时绑定
-        // 并且，如果视频视图可见且播放器未在播放，则开始播放
-        // 这样可以确保从后台返回时能自动恢复播放
-        if (Build.VERSION.SDK_INT <= 23) {
-            latestVideoView.player = exoPlayer
-        }
-        if (latestVideoView.visibility == View.VISIBLE && exoPlayer?.isPlaying == false) {
+        if (latestVideoView.isVisible && exoPlayer?.isPlaying == false) {
             exoPlayer?.play()
         }
     }
@@ -124,9 +117,7 @@ class PhotoListActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         // 解除 PlayerView 和 ExoPlayer 的绑定 安全地释放 Surface，避免资源泄露和状态冲突
-        if (Build.VERSION.SDK_INT > 23) {
-            latestVideoView.player = null
-        }
+        latestVideoView.player = null
     }
 
     override fun onDestroy() {
@@ -169,30 +160,45 @@ class PhotoListActivity : AppCompatActivity() {
         exoPlayer?.stop()
         exoPlayer?.clearMediaItems()
 
+        // 关键：在切换逻辑开始前，立即解绑播放器，触发Surface的释放流程。
+        // 无论接下来是播图片还是视频，这一步都是安全的。
+        latestVideoView.player = null
+
         if (item.type == MediaType.VIDEO) {
             latestVideoView.visibility = View.VISIBLE
             latestImageView.visibility = View.INVISIBLE
 
-//            // 直接使用已存在的播放器实例加载新媒体
-//            val mediaItem = ExoMediaItem.fromUri(item.uri)
-//            exoPlayer?.setMediaItem(mediaItem)
-//            exoPlayer?.prepare()
-//            exoPlayer?.play()
-//            debugLog("Playing video.")
-            // 使用 Handler 在UI线程上延迟执行加载
-            // 这给了 ExoPlayer 足够的时间来完全释放前一个视频的资源（特别是 Surface）
-            // 从而避免了新旧视频争抢 Surface 导致的 "detachBuffer" 错误
-            // 50毫秒是一个经验值，通常足以应对大多数情况。
-            latestVideoView.postDelayed({
-                // 确保在这期间 Activity 没有被销毁
-                if (exoPlayer != null) {
+//            // 使用 Handler 在UI线程上延迟执行加载
+//            // 这给了 ExoPlayer 足够的时间来完全释放前一个视频的资源（特别是 Surface）
+//            // 从而避免了新旧视频争抢 Surface 导致的 "detachBuffer" 错误
+//            // 50毫秒是一个经验值，通常足以应对大多数情况。
+//            latestVideoView.postDelayed({
+//                // 确保在这期间 Activity 没有被销毁
+//                if (exoPlayer != null) {
+//                    latestVideoView.player = exoPlayer
+//                    val mediaItem = ExoMediaItem.fromUri(item.uri)
+//                    exoPlayer?.setMediaItem(mediaItem)
+//                    exoPlayer?.prepare()
+//                    exoPlayer?.play()
+//                    debugLog("Playing video (after delay).")
+//                }
+//            }, 50) // 延迟xxx毫秒
+
+            // 使用 post 而不是 postDelayed。
+            // 这会将操作推迟到下一个UI绘制周期，通常足以让底层的Surface完成解绑和重新准备。
+            // 这是比固定延迟更健壮的方式。
+            latestVideoView.post {
+                // 再次检查Activity是否还存活，避免在已销毁的Activity上操作
+                if (!isDestroyed && exoPlayer != null) {
+                    // 重新将播放器实例绑定到PlayerView
+                    latestVideoView.player = exoPlayer
                     val mediaItem = ExoMediaItem.fromUri(item.uri)
                     exoPlayer?.setMediaItem(mediaItem)
                     exoPlayer?.prepare()
                     exoPlayer?.play()
-                    debugLog("Playing video (after delay).")
+                    debugLog("Playing video.")
                 }
-            }, 50) // 延迟xxx毫秒
+            }
 
         } else {
             latestImageView.visibility = View.VISIBLE
