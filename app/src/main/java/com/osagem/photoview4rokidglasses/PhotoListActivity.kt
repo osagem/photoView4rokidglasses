@@ -241,7 +241,7 @@ class PhotoListActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // 1. 设置删除操作的结果回调
+        // 设置删除操作的结果回调
         deleteRequestLauncher =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
@@ -253,10 +253,10 @@ class PhotoListActivity : AppCompatActivity() {
                 }
             }
 
-        // 2. 为“下一张”按钮设置点击事件
+        // 为“下一张”按钮设置点击事件
         buttonNext.setOnClickListener { loadNextMedia() }
 
-        // 3. 为“返回主页”按钮设置点击事件
+        // 为“返回主页”按钮设置点击事件
         buttonBackmain.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -264,7 +264,7 @@ class PhotoListActivity : AppCompatActivity() {
             finish()
         }
 
-        // 4. 为“删除”按钮设置点击事件
+        // 为“删除”按钮设置点击事件
         buttonDelphoto.setOnClickListener {
             if (allMediaItems.isNotEmpty() && currentImageIndex in allMediaItems.indices) {
                 deleteCurrentImage()
@@ -301,16 +301,7 @@ class PhotoListActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if (permissionsToRequest.isNotEmpty()) {
-//            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-//                if (permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
-//                    loadAllMediaUris()
-//                } else {
-//                    showCenteredToast(getString(R.string.toast_read_permission_denied))
-//                    finish()
-//                }
-//            }.launch(permissionsToRequest.toTypedArray())
-
-            // 【修改】使用已声明的成员变量来启动权限请求
+            // 使用已声明的成员变量来启动权限请求
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
         } else {
             loadAllMediaUris()
