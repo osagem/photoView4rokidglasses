@@ -74,6 +74,7 @@ class PhotoListActivity : AppCompatActivity() {
     private var centeredToast: Toast? = null
     private var emojiBitmap: Bitmap? = null
     private lateinit var deleteRequestLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     // ------------------- 生命周期管理-------------------
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +94,18 @@ class PhotoListActivity : AppCompatActivity() {
 
         // 设置监听器等
         setupListeners()
+
+        // 【新增】在这里初始化 permissionLauncher
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                // 检查读取权限是否被授予
+                if (permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
+                    loadAllMediaUris()
+                } else {
+                    showCenteredToast(getString(R.string.toast_read_permission_denied))
+                    finish() // 权限被拒绝，关闭页面
+                }
+            }
 
         // 开始业务逻辑
         checkAndRequestPermission()
@@ -288,14 +301,17 @@ class PhotoListActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if (permissionsToRequest.isNotEmpty()) {
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                if (permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
-                    loadAllMediaUris()
-                } else {
-                    showCenteredToast(getString(R.string.toast_read_permission_denied))
-                    finish()
-                }
-            }.launch(permissionsToRequest.toTypedArray())
+//            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+//                if (permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
+//                    loadAllMediaUris()
+//                } else {
+//                    showCenteredToast(getString(R.string.toast_read_permission_denied))
+//                    finish()
+//                }
+//            }.launch(permissionsToRequest.toTypedArray())
+
+            // 【修改】使用已声明的成员变量来启动权限请求
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
         } else {
             loadAllMediaUris()
         }
