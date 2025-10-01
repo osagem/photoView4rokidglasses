@@ -25,17 +25,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import androidx.media3.common.MediaItem as ExoMediaItem
+import kotlinx.coroutines.launch
 
 class PhotoListActivity : AppCompatActivity() {
 
@@ -337,66 +342,147 @@ class PhotoListActivity : AppCompatActivity() {
     }
 
     private fun loadAllMediaUris() {
-        allMediaItems.clear()
-        currentImageIndex = -1
-        queryMedia(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            Environment.DIRECTORY_DCIM + File.separator + "Camera",
-            MediaType.IMAGE
-        )
-        queryMedia(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            Environment.DIRECTORY_MOVIES + File.separator + "Camera",
-            MediaType.VIDEO
-        )
-        allMediaItems.sortByDescending { it.dateTaken }
-        if (allMediaItems.isNotEmpty()) {
-            debugLog("Total media loaded: ${allMediaItems.size}")
-            loadNextMedia()
-            buttonNext.visibility = View.VISIBLE
-        } else {
-            debugLog("No media found in specified directories")
-            handleNoPhotosFound()
+        // 使用 lifecycleScope 启动一个协程，它会自动在 Activity 销毁时取消
+        lifecycleScope.launch {
+            // 显示一个加载指示器（可选，但推荐）
+            // showLoadingIndicator(true)
+
+            // withContext(Dispatchers.IO) 将代码块切换到专门用于磁盘和网络操作的后台线程
+            val mediaResult = withContext(Dispatchers.IO) {
+                val imageItems = queryMedia(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_DCIM + File.separator + "Camera",
+                    MediaType.IMAGE
+                )
+                val videoItems = queryMedia(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_MOVIES + File.separator + "Camera",
+                    MediaType.VIDEO
+                )
+                // 在后台合并并排序
+                (imageItems + videoItems).sortedByDescending { it.dateTaken }
+            }
+            // withContext 会自动切回主线程，在这里安全地更新UI
+            // showLoadingIndicator(false)
+            allMediaItems.clear()
+            allMediaItems.addAll(mediaResult)
+            currentImageIndex = -1 // 重置索引
+
+//        queryMedia(
+//            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//            Environment.DIRECTORY_DCIM + File.separator + "Camera",
+//            MediaType.IMAGE
+//        )
+//        queryMedia(
+//            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+//            Environment.DIRECTORY_MOVIES + File.separator + "Camera",
+//            MediaType.VIDEO
+//        )
+//        allMediaItems.sortByDescending { it.dateTaken }
+
+            if (allMediaItems.isNotEmpty()) {
+                debugLog("Total media loaded: ${allMediaItems.size}")
+                //loadNextMedia()
+                loadSpecificMedia(0)
+                buttonNext.visibility = View.VISIBLE
+            } else {
+                debugLog("No media found in specified directories")
+                handleNoPhotosFound()
+            }
+            // 确保在加载完成后更新计数
+            updatePhotoCountText()
         }
     }
 
-    private fun queryMedia(contentUri: Uri, folder: String, type: MediaType) {
-        val projection = arrayOf(
-            MediaStore.MediaColumns._ID,
-            MediaStore.MediaColumns.DATE_TAKEN,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
-        )
+//    private fun queryMedia(contentUri: Uri, folder: String, type: MediaType): List<MediaItem> {
+//        val projection = arrayOf(
+//            MediaStore.MediaColumns._ID,
+//            MediaStore.MediaColumns.DATE_TAKEN,
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
+//        )
+//
+//        val selection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
+//        } else {
+//            "${MediaStore.MediaColumns.DATA} LIKE ?"
+//        }
+//        val selectionArgs = arrayOf("%$folder/%")
+//
+//        try {
+//            contentResolver.query(contentUri, projection, selection, selectionArgs, null)
+//                ?.use { cursor ->
+//                    val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+//                    val dateTakenColumn =
+//                        cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+//                    while (cursor.moveToNext()) {
+//                        val id = cursor.getLong(idColumn)
+//                        val dateTaken = cursor.getLong(dateTakenColumn)
+//                        val uri = ContentUris.withAppendedId(contentUri, id)
+//                        allMediaItems.add(MediaItem(uri, type, dateTaken))
+//                        debugLog("Loaded ${type.name} → $uri")
+//                    }
+//                }
+//        } catch (e: Exception) {
+//            showCenteredToast(
+//                getString(R.string.toast_error_loading_images, e.localizedMessage),
+//                Toast.LENGTH_LONG
+//            )
+//            Log.e(TAG, "Error loading ${type.name}", e)
+//            handleNoPhotosFound(true)
+//        }
+//    }
 
-        val selection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
+    //【重构点 2】: 改造 queryMedia，让它只负责查询并返回结果列表
+    private fun queryMedia(contentUri: Uri, folder: String, type: MediaType): List<MediaItem> {
+        val items = mutableListOf<MediaItem>()
+        val projection: Array<String>
+        val selection: String
+        val selectionArgs: Array<String>
+
+        //【重构点 3】: 简化 Android Q 及以上版本的路径查询逻辑
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            projection = arrayOf(
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DATE_TAKEN
+            )
+            // 在 Android 10+，直接使用 RELATIVE_PATH 查询更高效、更标准
+            selection = "${MediaStore.MediaColumns.RELATIVE_PATH} = ?"
+            selectionArgs = arrayOf("$folder/") // 精确匹配，而不是使用 LIKE
         } else {
-            "${MediaStore.MediaColumns.DATA} LIKE ?"
+            projection = arrayOf(
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DATE_TAKEN,
+                MediaStore.MediaColumns.DATA
+            )
+            selection = "${MediaStore.MediaColumns.DATA} LIKE ?"
+            selectionArgs = arrayOf("%/$folder/%") // 旧版本只能通过模糊匹配文件路径
         }
-        val selectionArgs = arrayOf("%$folder/%")
+
+        // 统一的排序顺序
+        val sortOrder = "${MediaStore.MediaColumns.DATE_TAKEN} DESC"
 
         try {
-            contentResolver.query(contentUri, projection, selection, selectionArgs, null)
+            contentResolver.query(contentUri, projection, selection, selectionArgs, sortOrder)
                 ?.use { cursor ->
                     val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-                    val dateTakenColumn =
-                        cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+                    val dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idColumn)
                         val dateTaken = cursor.getLong(dateTakenColumn)
                         val uri = ContentUris.withAppendedId(contentUri, id)
-                        allMediaItems.add(MediaItem(uri, type, dateTaken))
-                        debugLog("Loaded ${type.name} → $uri")
+                        items.add(MediaItem(uri, type, dateTaken))
                     }
+                    debugLog("Query found ${items.size} items of type ${type.name} in $folder")
                 }
         } catch (e: Exception) {
-            showCenteredToast(
-                getString(R.string.toast_error_loading_images, e.localizedMessage),
-                Toast.LENGTH_LONG
-            )
-            Log.e(TAG, "Error loading ${type.name}", e)
-            handleNoPhotosFound(true)
+            // 在后台线程记录日志，避免在主线程显示UI（Toast）
+            Log.e(TAG, "Error loading ${type.name} from $folder. This might be a permission issue.", e)
+            // 这里只记录错误，不直接操作UI。UI的错误处理统一在 loadAllMediaUris 的主线程部分进行。
         }
+        return items
     }
+
 
     private fun loadNextMedia() {
         if (allMediaItems.isEmpty()) {
