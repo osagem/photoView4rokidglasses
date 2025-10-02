@@ -48,7 +48,7 @@ class PhotoListActivity : AppCompatActivity() {
     data class MediaItem(val uri: Uri, val type: MediaType, val dateTaken: Long)
     enum class MediaType { IMAGE, VIDEO }
     companion object {
-        private const val DEBUG = true //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
+        private const val DEBUG = false //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
 
         private const val TAG = "PhotoManager"
 
@@ -165,7 +165,7 @@ class PhotoListActivity : AppCompatActivity() {
         exoPlayer = null
     }
 
-    // ------------------- 媒体加载与切换 (逻辑不变) -------------------
+    // ------------------- 媒体加载与切换 -------------------
     private fun loadSpecificMedia(index: Int) {
         if (index !in allMediaItems.indices) {
             handleNoPhotosFound()
@@ -175,42 +175,45 @@ class PhotoListActivity : AppCompatActivity() {
         val item = allMediaItems[index]
         debugLog("Displaying ${item.type.name} → ${item.uri}")
 
-        // 停止并清空旧的媒体项
-        exoPlayer?.stop()
-        exoPlayer?.clearMediaItems()
+        // 统一管理视图可见性和播放器状态
+        when (item.type) {
+            MediaType.VIDEO -> {
+                // 准备播放视频
+                latestImageView.visibility = View.INVISIBLE
+                latestVideoView.visibility = View.VISIBLE
 
-        // 关键：在切换逻辑开始前，立即解绑播放器，触发Surface的释放流程。
-        // 无论接下来是播图片还是视频，这一步都是安全的。
-        latestVideoView.player = null
-
-        if (item.type == MediaType.VIDEO) {
-            latestVideoView.visibility = View.VISIBLE
-            latestImageView.visibility = View.INVISIBLE
-
-            // 使用 post 而不是 postDelayed 会将操作推迟到下一个UI绘制周期，让底层的Surface完成解绑和重新准备
-            latestVideoView.post {
-                // 再次检查Activity是否还存活，避免在已销毁的Activity上操作
-                if (!isDestroyed && exoPlayer != null) {
-                    // 重新将播放器实例绑定到PlayerView
+                // 1. 确保PlayerView与播放器绑定。ExoPlayer将自动处理Surface的获取。
+                if (latestVideoView.player == null) {
                     latestVideoView.player = exoPlayer
-                    val mediaItem = ExoMediaItem.fromUri(item.uri)
-                    exoPlayer?.setMediaItem(mediaItem)
-                    exoPlayer?.prepare()
-                    exoPlayer?.play()
-                    debugLog("Playing video.")
                 }
-            }
 
-        } else {
-            latestImageView.visibility = View.VISIBLE
-            latestVideoView.visibility = View.INVISIBLE
-            Glide.with(this)
-                .load(item.uri)
-                .into(latestImageView)
-            debugLog("Displaying image.")
+                // 2. 使用ExoPlayer的高效媒体项切换API
+                val mediaItem = ExoMediaItem.fromUri(item.uri)
+                exoPlayer?.setMediaItem(mediaItem)
+                exoPlayer?.prepare() // 准备新的媒体项
+                exoPlayer?.play()     // 开始或恢复播放
+                debugLog("Playing video.")
+            }
+            MediaType.IMAGE -> {
+                // 停止播放并从PlayerView解绑，这是关键！
+                // 这会干净地释放Surface，避免资源冲突。
+                exoPlayer?.stop() // 停止播放
+                latestVideoView.player = null // 解绑
+
+                // 准备显示图片
+                latestVideoView.visibility = View.INVISIBLE
+                latestImageView.visibility = View.VISIBLE
+
+                // 加载图片
+                Glide.with(this)
+                    .load(item.uri)
+                    .into(latestImageView)
+                debugLog("Displaying image.")
+            }
         }
         updatePhotoCountText()
     }
+
 
     // ------------------- 其他辅助方法 -------------------
     private fun initializeViews() {
@@ -250,7 +253,7 @@ class PhotoListActivity : AppCompatActivity() {
                 }
             }
 
-        // 为“下一张”按钮设置点击事件
+        // 为“下一个”按钮设置点击事件
         buttonNext.setOnClickListener { loadNextMedia() }
 
         // 为“返回主页”按钮设置点击事件
@@ -461,6 +464,7 @@ class PhotoListActivity : AppCompatActivity() {
         showCenteredToast(message, Toast.LENGTH_LONG)
         allMediaItems.clear()
         currentImageIndex = -1
+        //exoPlayer?.stop()
         latestVideoView.visibility = View.INVISIBLE
         latestImageView.visibility = View.VISIBLE
         val emojiBitmapToShow =
