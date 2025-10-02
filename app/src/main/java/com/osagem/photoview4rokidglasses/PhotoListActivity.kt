@@ -48,7 +48,7 @@ class PhotoListActivity : AppCompatActivity() {
     data class MediaItem(val uri: Uri, val type: MediaType, val dateTaken: Long)
     enum class MediaType { IMAGE, VIDEO }
     companion object {
-        private const val DEBUG = false //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
+        private const val DEBUG = true //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
 
         private const val TAG = "PhotoManager"
 
@@ -187,25 +187,7 @@ class PhotoListActivity : AppCompatActivity() {
             latestVideoView.visibility = View.VISIBLE
             latestImageView.visibility = View.INVISIBLE
 
-//            // 使用 Handler 在UI线程上延迟执行加载
-//            // 这给了 ExoPlayer 足够的时间来完全释放前一个视频的资源（特别是 Surface）
-//            // 从而避免了新旧视频争抢 Surface 导致的 "detachBuffer" 错误
-//            // 50毫秒是一个经验值，通常足以应对大多数情况。
-//            latestVideoView.postDelayed({
-//                // 确保在这期间 Activity 没有被销毁
-//                if (exoPlayer != null) {
-//                    latestVideoView.player = exoPlayer
-//                    val mediaItem = ExoMediaItem.fromUri(item.uri)
-//                    exoPlayer?.setMediaItem(mediaItem)
-//                    exoPlayer?.prepare()
-//                    exoPlayer?.play()
-//                    debugLog("Playing video (after delay).")
-//                }
-//            }, 50) // 延迟xxx毫秒
-
-            // 使用 post 而不是 postDelayed。
-            // 这会将操作推迟到下一个UI绘制周期，通常足以让底层的Surface完成解绑和重新准备。
-            // 这是比固定延迟更健壮的方式。
+            // 使用 post 而不是 postDelayed 会将操作推迟到下一个UI绘制周期，让底层的Surface完成解绑和重新准备
             latestVideoView.post {
                 // 再次检查Activity是否还存活，避免在已销毁的Activity上操作
                 if (!isDestroyed && exoPlayer != null) {
@@ -406,7 +388,6 @@ class PhotoListActivity : AppCompatActivity() {
 
     // queryMedia 只负责查询并返回结果列表
     private fun queryMedia(contentUri: Uri, folder: String, type: MediaType): List<MediaItem> {
-        val items = mutableListOf<MediaItem>()
         val projection: Array<String>
         val selection: String
         val selectionArgs: Array<String>
@@ -433,28 +414,27 @@ class PhotoListActivity : AppCompatActivity() {
         // 统一的排序顺序
         val sortOrder = "${MediaStore.MediaColumns.DATE_TAKEN} DESC"
 
-        try {
-            contentResolver.query(contentUri, projection, selection, selectionArgs, sortOrder)
-                ?.use { cursor ->
-                    val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-                    val dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+        return try {
+            // 使用'use'块来自动管理Cursor的生命周期，并在结束后返回列表
+            contentResolver.query(contentUri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
+                val items = mutableListOf<MediaItem>()
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                val dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
 
-                    while (cursor.moveToNext()) {
-                        val id = cursor.getLong(idColumn)
-                        val dateTaken = cursor.getLong(dateTakenColumn)
-                        val uri = ContentUris.withAppendedId(contentUri, id)
-                        items.add(MediaItem(uri, type, dateTaken))
-                    }
-                    debugLog("Query found ${items.size} items of type ${type.name} in $folder")
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val dateTaken = cursor.getLong(dateTakenColumn)
+                    val uri = ContentUris.withAppendedId(contentUri, id)
+                    items.add(MediaItem(uri, type, dateTaken))
                 }
+                debugLog("Query found ${items.size} items of type ${type.name} in $folder")
+                items // use块的最后一行作为其返回值
+            } ?: emptyList() // 如果查询返回null，则直接返回一个空列表
         } catch (e: Exception) {
-            // 在后台线程记录日志，避免在主线程显示UI（Toast）
             Log.e(TAG, "Error loading ${type.name} from $folder. This might be a permission issue.", e)
-            // 这里只记录错误，不直接操作UI。UI的错误处理统一在 loadAllMediaUris 的主线程部分进行。
+            emptyList() // 如果发生异常，同样返回一个空列表，保证程序不会崩溃
         }
-        return items
     }
-
 
     private fun loadNextMedia() {
         if (allMediaItems.isEmpty()) {
