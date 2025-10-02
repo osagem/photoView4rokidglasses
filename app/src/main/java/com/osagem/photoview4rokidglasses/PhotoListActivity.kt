@@ -19,13 +19,13 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -73,6 +73,7 @@ class PhotoListActivity : AppCompatActivity() {
     // 工具类
     private var centeredToast: Toast? = null
     private var emojiBitmap: Bitmap? = null
+    private lateinit var loadingIndicator: ProgressBar
     private lateinit var deleteRequestLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
@@ -238,6 +239,20 @@ class PhotoListActivity : AppCompatActivity() {
         buttonBackmain.visibility = View.VISIBLE
         buttonDelphoto = findViewById(R.id.buttonDelphoto)
         photoCountTextView = findViewById(R.id.photoCountTextView)
+        loadingIndicator = findViewById(R.id.loadingIndicator)
+    }
+
+    // 视频加载耗时等待时的加载指示器
+    private fun showLoadingIndicator(show: Boolean) {
+        loadingIndicator.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    // 查看窗口获得焦点时，请求next按钮获取焦点，改进体验
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            buttonNext.requestFocus()
+        }
     }
 
     private fun setupListeners() {
@@ -352,9 +367,7 @@ class PhotoListActivity : AppCompatActivity() {
         // 使用 lifecycleScope 启动一个协程，它会自动在 Activity 销毁时取消
         lifecycleScope.launch {
             // 显示一个加载指示器（可选，但推荐）
-            // showLoadingIndicator(true)
-
-            // withContext(Dispatchers.IO) 将代码块切换到专门用于磁盘和网络操作的后台线程
+            showLoadingIndicator(true)
             val mediaResult = withContext(Dispatchers.IO) {
                 val imageItems = queryMedia(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -369,23 +382,13 @@ class PhotoListActivity : AppCompatActivity() {
                 // 在后台合并并排序
                 (imageItems + videoItems).sortedByDescending { it.dateTaken }
             }
+            // 隐藏加载指示器
+            showLoadingIndicator(false)
             // withContext 会自动切回主线程，在这里安全地更新UI
             // showLoadingIndicator(false)
             allMediaItems.clear()
             allMediaItems.addAll(mediaResult)
             currentImageIndex = -1 // 重置索引
-
-//        queryMedia(
-//            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-//            Environment.DIRECTORY_DCIM + File.separator + "Camera",
-//            MediaType.IMAGE
-//        )
-//        queryMedia(
-//            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-//            Environment.DIRECTORY_MOVIES + File.separator + "Camera",
-//            MediaType.VIDEO
-//        )
-//        allMediaItems.sortByDescending { it.dateTaken }
 
             if (allMediaItems.isNotEmpty()) {
                 debugLog("Total media loaded: ${allMediaItems.size}")
@@ -401,52 +404,14 @@ class PhotoListActivity : AppCompatActivity() {
         }
     }
 
-//    private fun queryMedia(contentUri: Uri, folder: String, type: MediaType): List<MediaItem> {
-//        val projection = arrayOf(
-//            MediaStore.MediaColumns._ID,
-//            MediaStore.MediaColumns.DATE_TAKEN,
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
-//        )
-//
-//        val selection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
-//        } else {
-//            "${MediaStore.MediaColumns.DATA} LIKE ?"
-//        }
-//        val selectionArgs = arrayOf("%$folder/%")
-//
-//        try {
-//            contentResolver.query(contentUri, projection, selection, selectionArgs, null)
-//                ?.use { cursor ->
-//                    val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-//                    val dateTakenColumn =
-//                        cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
-//                    while (cursor.moveToNext()) {
-//                        val id = cursor.getLong(idColumn)
-//                        val dateTaken = cursor.getLong(dateTakenColumn)
-//                        val uri = ContentUris.withAppendedId(contentUri, id)
-//                        allMediaItems.add(MediaItem(uri, type, dateTaken))
-//                        debugLog("Loaded ${type.name} → $uri")
-//                    }
-//                }
-//        } catch (e: Exception) {
-//            showCenteredToast(
-//                getString(R.string.toast_error_loading_images, e.localizedMessage),
-//                Toast.LENGTH_LONG
-//            )
-//            Log.e(TAG, "Error loading ${type.name}", e)
-//            handleNoPhotosFound(true)
-//        }
-//    }
-
-    //【重构点 2】: 改造 queryMedia，让它只负责查询并返回结果列表
+    // queryMedia 只负责查询并返回结果列表
     private fun queryMedia(contentUri: Uri, folder: String, type: MediaType): List<MediaItem> {
         val items = mutableListOf<MediaItem>()
         val projection: Array<String>
         val selection: String
         val selectionArgs: Array<String>
 
-        //【重构点 3】: 简化 Android Q 及以上版本的路径查询逻辑
+        // Android Q 及以上版本的路径查询逻辑
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             projection = arrayOf(
                 MediaStore.MediaColumns._ID,
