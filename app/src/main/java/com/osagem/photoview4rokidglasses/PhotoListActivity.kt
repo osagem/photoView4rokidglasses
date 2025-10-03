@@ -48,7 +48,7 @@ class PhotoListActivity : AppCompatActivity() {
     data class MediaItem(val uri: Uri, val type: MediaType, val dateTaken: Long)
     enum class MediaType { IMAGE, VIDEO }
     companion object {
-        private const val DEBUG = false //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
+        private const val DEBUG = true //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
 
         private const val TAG = "PhotoManager"
 
@@ -359,13 +359,33 @@ class PhotoListActivity : AppCompatActivity() {
                     Environment.DIRECTORY_DCIM + File.separator + "Camera",
                     MediaType.IMAGE
                 )
+                val picturesItems = queryMedia(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_PICTURES,
+                    MediaType.IMAGE
+                )
                 val videoItems = queryMedia(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     Environment.DIRECTORY_MOVIES + File.separator + "Camera",
                     MediaType.VIDEO
                 )
+                val videoBItems = queryMedia(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_PICTURES,
+                    MediaType.VIDEO
+                )
+                val videoCItems = queryMedia(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_MOVIES,
+                    MediaType.VIDEO
+                )
+                val videoDItems = queryMedia(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_DCIM + File.separator + "Camera",
+                    MediaType.VIDEO
+                )
                 // 在后台合并并排序
-                (imageItems + videoItems).sortedByDescending { it.dateTaken }
+                (imageItems + picturesItems + videoItems + videoBItems + videoCItems + videoDItems).sortedByDescending { it.dateTaken }
             }
             // 隐藏加载指示器
             showLoadingIndicator(false)
