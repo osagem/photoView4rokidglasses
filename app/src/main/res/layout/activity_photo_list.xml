@@ -12,25 +12,12 @@
         android:id="@+id/playerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:use_controller="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/textView_videoInfo"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text="video info"-->
-    <!--        android:textColor="@color/button_stroke_color_selector"-->
-    <!--        android:visibility="gone"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        app:layout_constraintVertical_bias="0.696" />-->
 
     <ImageView
         android:id="@+id/latestImageView"
@@ -41,8 +28,27 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.86"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+    <TextView
+        android:id="@+id/textView_videoInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="14sp"
+        android:textColor="@color/rgrcolor"
+        android:gravity="center"
+        android:background="#80000000"
+        android:padding="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.73"
+        tools:visibility="visible"
+        tools:text="视频文件名.mp4 (1920x1080)" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonDelphoto"
@@ -51,7 +57,7 @@
         android:layout_height="wrap_content"
         android:text="@string/button_delPhoto"
         android:textColor="@color/button_stroke_color_selector"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +74,7 @@
         android:layout_height="wrap_content"
         android:text="@string/button_backMain"
         android:textColor="@color/button_stroke_color_selector"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,7 +92,7 @@
         android:layout_height="wrap_content"
         android:text="@string/button_nextPhoto"
         android:textColor="@color/button_stroke_color_selector"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:cornerRadius="12px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -118,7 +124,7 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

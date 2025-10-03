@@ -31,4 +31,5 @@
     <string name="toast_reached_end_starting_over">Reached end, starting over.</string>
     <string name="toast_error_accessing_photos">Error accessing.</string>
     <string name="toast_no_photos_found">No photos or videos were found on the RokidGlasses.</string>
+    <string name="video_info_format">%1$s / %2$s</string>
 </resources>

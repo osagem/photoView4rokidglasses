@@ -41,11 +41,18 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import androidx.media3.common.MediaItem as ExoMediaItem
 import kotlinx.coroutines.launch
+import android.os.Handler
+import android.os.Looper
+import androidx.media3.common.Player
 
 class PhotoListActivity : AppCompatActivity() {
 
     // 数据类和枚举
-    data class MediaItem(val uri: Uri, val type: MediaType, val dateTaken: Long)
+    data class MediaItem(
+        val uri: Uri,
+        val type: MediaType,
+        val dateTaken: Long,
+    )
     enum class MediaType { IMAGE, VIDEO }
     companion object {
         private const val DEBUG = true //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
@@ -74,8 +81,32 @@ class PhotoListActivity : AppCompatActivity() {
     private var centeredToast: Toast? = null
     private var emojiBitmap: Bitmap? = null
     private lateinit var loadingIndicator: ProgressBar
+    private lateinit var textView_videoInfo: TextView //增加文件信息显示
     private lateinit var deleteRequestLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+
+    // --- 【新增代码块开始】 ---
+    // 用于定时更新播放进度的 Handler 和 Runnable
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateProgressAction = object : Runnable {
+        override fun run() {
+            exoPlayer?.let { player ->
+                // 【修改】放宽条件：只要播放器不是空闲状态且有时长，就更新UI
+                if (player.playbackState != Player.STATE_IDLE && player.duration > 0) {
+                    val currentPosition = player.currentPosition
+                    val totalDuration = player.duration
+                    textView_videoInfo.text = getString(
+                        R.string.video_info_format,
+                        formatDuration(currentPosition),
+                        formatDuration(totalDuration)
+                    )
+                }
+            }
+            // 每秒钟重复执行此任务
+            handler.postDelayed(this, 1000)
+        }
+    }
+    // --- 【新增代码块结束】 ---
 
     // ------------------- 生命周期管理-------------------
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,6 +172,10 @@ class PhotoListActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // --- 【新增代码行】 ---
+        // 停止所有待处理的进度更新任务
+        handler.removeCallbacks(updateProgressAction)
+
         // 在 onDestroy 中彻底释放播放器资源 这是播放器生命周期的终点
         releasePlayer()
         centeredToast?.cancel()
@@ -154,6 +189,35 @@ class PhotoListActivity : AppCompatActivity() {
         // 它只负责创建实例，不涉及UI绑定
         exoPlayer = ExoPlayer.Builder(this).build().apply {
             repeatMode = ExoPlayer.REPEAT_MODE_ONE
+
+            // --- 【新增代码块开始】 ---
+            // 添加监听器以在视频准备就绪时更新UI
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    // 当播放器准备好时
+                    if (playbackState == Player.STATE_READY) {
+                        val duration = exoPlayer?.duration ?: 0
+                        // 【关键修改】不再依赖外部的 currentImageIndex。
+                        // 只要播放器获得了有效的时长（意味着它是一个可播放的媒体，比如视频），就更新UI。
+                        if (duration > 0) {
+                            textView_videoInfo.text = getString(
+                                R.string.video_info_format,
+                                formatDuration(0),
+                                formatDuration(duration)
+                            )
+                        }
+                    }
+
+                    // 【新增逻辑】如果媒体播放结束或者播放器停止，我们也需要清空文本
+                    // 这能确保从视频切换到图片时，信息能被正确清除
+                    if (playbackState == Player.STATE_ENDED || playbackState == Player.STATE_IDLE) {
+                        if (latestImageView.isVisible) { // 确认当前是图片视图在显示
+                            textView_videoInfo.text = ""
+                        }
+                    }
+                }
+            })
+            // --- 【修改结束】 ---
         }
     }
 
@@ -175,6 +239,9 @@ class PhotoListActivity : AppCompatActivity() {
         val item = allMediaItems[index]
         debugLog("Displaying ${item.type.name} → ${item.uri}")
 
+        // 移除之前的所有定时任务，防止重复更新
+        handler.removeCallbacks(updateProgressAction)
+
         // 统一管理视图可见性和播放器状态
         when (item.type) {
             MediaType.VIDEO -> {
@@ -182,19 +249,32 @@ class PhotoListActivity : AppCompatActivity() {
                 latestImageView.visibility = View.INVISIBLE
                 latestVideoView.visibility = View.VISIBLE
 
-                // 1. 确保PlayerView与播放器绑定。ExoPlayer将自动处理Surface的获取。
+                // 当是视频时，显示信息文本框
+                textView_videoInfo.visibility = View.VISIBLE
+                // 2. 为了调试，我们先给它一个临时的文本。
+                //    如果这个文本能显示，说明我们的UI控制是有效的。
+                textView_videoInfo.text = "..." // 设置一个加载中的占位符
+
+                // 确保PlayerView与播放器绑定。ExoPlayer将自动处理Surface的获取。
                 if (latestVideoView.player == null) {
                     latestVideoView.player = exoPlayer
                 }
 
-                // 2. 使用ExoPlayer的高效媒体项切换API
+                // 使用ExoPlayer的高效媒体项切换API
                 val mediaItem = ExoMediaItem.fromUri(item.uri)
                 exoPlayer?.setMediaItem(mediaItem)
                 exoPlayer?.prepare() // 准备新的媒体项
                 exoPlayer?.play()     // 开始或恢复播放
-                debugLog("Playing video.")
+
+                // 启动进度更新的定时任务
+                handler.post(updateProgressAction)
+                debugLog("Playing video and starting progress updates.")
             }
             MediaType.IMAGE -> {
+                // 当是图片时，隐藏信息文本框
+                textView_videoInfo.visibility = View.INVISIBLE
+                textView_videoInfo.text = "" // 同时清空文本
+
                 // 停止播放并从PlayerView解绑，这是关键！
                 // 这会干净地释放Surface，避免资源冲突。
                 exoPlayer?.stop() // 停止播放
@@ -216,6 +296,16 @@ class PhotoListActivity : AppCompatActivity() {
 
 
     // ------------------- 其他辅助方法 -------------------
+
+    // --- 【新增代码块开始】 ---
+    private fun formatDuration(milliseconds: Long): String {
+        val totalSeconds = milliseconds / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
+    }
+// --- 【新增代码块结束】 ---
+
     private fun initializeViews() {
         latestImageView = findViewById(R.id.latestImageView)
         latestVideoView = findViewById(R.id.playerView)
@@ -225,6 +315,7 @@ class PhotoListActivity : AppCompatActivity() {
         buttonDelphoto = findViewById(R.id.buttonDelphoto)
         photoCountTextView = findViewById(R.id.photoCountTextView)
         loadingIndicator = findViewById(R.id.loadingIndicator)
+        textView_videoInfo = findViewById(R.id.textView_videoInfo) //增加文件信息显示 初始化
     }
 
     // 视频加载耗时等待时的加载指示器

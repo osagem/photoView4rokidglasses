@@ -31,4 +31,5 @@
     <string name="toast_reached_end_starting_over">已经到头了，已重新开始</string>
     <string name="toast_error_accessing_photos">访问出错</string>
     <string name="toast_no_photos_found">在RokidGlasses端没有找到照片和视频</string>
+    <string name="video_info_format">%1$s / %2$s</string>
 </resources>
