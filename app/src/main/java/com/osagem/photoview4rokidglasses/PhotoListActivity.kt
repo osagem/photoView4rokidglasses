@@ -85,8 +85,7 @@ class PhotoListActivity : AppCompatActivity() {
     private lateinit var deleteRequestLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
-    // --- 【新增代码块开始】 ---
-    // 用于定时更新播放进度的 Handler 和 Runnable
+    // 用于定时更新视频时长播放进度信息的 Handler 和 Runnable
     private val handler = Handler(Looper.getMainLooper())
     private val updateProgressAction = object : Runnable {
         override fun run() {
@@ -106,7 +105,6 @@ class PhotoListActivity : AppCompatActivity() {
             handler.postDelayed(this, 1000)
         }
     }
-    // --- 【新增代码块结束】 ---
 
     // ------------------- 生命周期管理-------------------
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -172,10 +170,8 @@ class PhotoListActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // --- 【新增代码行】 ---
         // 停止所有待处理的进度更新任务
         handler.removeCallbacks(updateProgressAction)
-
         // 在 onDestroy 中彻底释放播放器资源 这是播放器生命周期的终点
         releasePlayer()
         centeredToast?.cancel()
@@ -189,16 +185,13 @@ class PhotoListActivity : AppCompatActivity() {
         // 它只负责创建实例，不涉及UI绑定
         exoPlayer = ExoPlayer.Builder(this).build().apply {
             repeatMode = ExoPlayer.REPEAT_MODE_ONE
-
-            // --- 【新增代码块开始】 ---
             // 添加监听器以在视频准备就绪时更新UI
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     // 当播放器准备好时
                     if (playbackState == Player.STATE_READY) {
                         val duration = exoPlayer?.duration ?: 0
-                        // 【关键修改】不再依赖外部的 currentImageIndex。
-                        // 只要播放器获得了有效的时长（意味着它是一个可播放的媒体，比如视频），就更新UI。
+                        // 只要播放器获得了有效的时长，就更新
                         if (duration > 0) {
                             textView_videoInfo.text = getString(
                                 R.string.video_info_format,
@@ -217,7 +210,6 @@ class PhotoListActivity : AppCompatActivity() {
                     }
                 }
             })
-            // --- 【修改结束】 ---
         }
     }
 
@@ -249,11 +241,10 @@ class PhotoListActivity : AppCompatActivity() {
                 latestImageView.visibility = View.INVISIBLE
                 latestVideoView.visibility = View.VISIBLE
 
-                // 当是视频时，显示信息文本框
+                // 当是视频时，显示视频时长信息文本框
                 textView_videoInfo.visibility = View.VISIBLE
-                // 2. 为了调试，我们先给它一个临时的文本。
-                //    如果这个文本能显示，说明我们的UI控制是有效的。
-                textView_videoInfo.text = "..." // 设置一个加载中的占位符
+                // 视频时长信息未完成加载时的占位符
+                textView_videoInfo.text = "..."
 
                 // 确保PlayerView与播放器绑定。ExoPlayer将自动处理Surface的获取。
                 if (latestVideoView.player == null) {
@@ -296,15 +287,12 @@ class PhotoListActivity : AppCompatActivity() {
 
 
     // ------------------- 其他辅助方法 -------------------
-
-    // --- 【新增代码块开始】 ---
     private fun formatDuration(milliseconds: Long): String {
         val totalSeconds = milliseconds / 1000
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
-// --- 【新增代码块结束】 ---
 
     private fun initializeViews() {
         latestImageView = findViewById(R.id.latestImageView)
