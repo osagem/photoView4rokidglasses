@@ -19,10 +19,12 @@
 btw：如果在手机rokid ai app里面提词器设置里绑定蓝牙鼠标、蓝牙指环、蓝牙指环轨迹球，则可以像鼠标一项操作
 
 
-屏摄图：
-<img width="481" height="640" alt="屏摄图" src="https://github.com/user-attachments/assets/4818b028-957b-4fba-bf34-4542db40d187" />
+屏摄视频：
+https://github.com/user-attachments/assets/c93350e2-2f8c-4665-ab66-522825544bdf
 
-同一界面的调试截图（实体rokid glasses如屏摄是单绿显示）：
+
+界面调试截图（实体rokid glasses如屏摄是单绿显示）：
+
 <img width="481" height="640" alt="调试截图" src="https://github.com/user-attachments/assets/f9ed46b7-f3df-4665-853f-8d8a0d5df4ac" />
 
 免责声明：
