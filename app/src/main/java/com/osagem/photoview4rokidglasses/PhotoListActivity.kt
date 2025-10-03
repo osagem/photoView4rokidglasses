@@ -55,7 +55,7 @@ class PhotoListActivity : AppCompatActivity() {
     )
     enum class MediaType { IMAGE, VIDEO }
     companion object {
-        private const val DEBUG = true //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
+        private const val DEBUG = false //false or true 调试开关：上线时改为 false 即可关闭所有调试日志
 
         private const val TAG = "PhotoManager"
 
