@@ -5,16 +5,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-//给退出app按钮添加退出功能
 import com.google.android.material.button.MaterialButton
-//添加text的打字机逐个字符显示效果
 import android.os.Handler
 import android.os.Looper
-import android.widget.TextView // 导入 TextView
-import android.view.View // 导入 View
-import android.animation.ObjectAnimator // 导入 ObjectAnimator
-import android.content.Intent // 给enter按钮添加打开照片列表功能
-import com.osagem.photoview4rokidglasses.BuildConfig
+import android.widget.TextView
+import android.view.View
+import android.animation.ObjectAnimator
+import android.content.Intent
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonEnter: MaterialButton
     private lateinit var buttonExitApp: MaterialButton
     private val fadeInDuration = 500L // 淡入动画的持续时间 (毫秒)
-    private lateinit var versionTextView: TextView // 将 versionTextView 声明为类成员变量
+    private lateinit var versionTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +44,11 @@ class MainActivity : AppCompatActivity() {
         buttonExitApp = findViewById(R.id.buttonExitapp)
         versionTextView = findViewById(R.id.main_version) // 初始化 versionTextView
 
-        // 1. 找到 main_version TextView
+        // 找到 main_version TextView
         val versionTextView: TextView = findViewById(R.id.main_version)
-        // 2. 从自动生成的 BuildConfig 中获取版本名称
+        // 从自动生成的 BuildConfig 中获取版本名称
         val versionName = BuildConfig.VERSION_NAME
-        // 3. 将版本名称设置到 TextView 的文本中
-        // 为了格式更清晰，你可以在前面加上 "v" 或 "Version "
+        // 将版本名称设置到 TextView 的文本中
         versionTextView.text = "v$versionName by osagem"
 
         // 初始化时清空 TextView
@@ -73,7 +69,6 @@ class MainActivity : AppCompatActivity() {
 
         startTypingEffect()
 
-        // Set OnClickListener for buttonEnter
         buttonEnter.setOnClickListener {
             val intent = Intent(this, PhotoListActivity::class.java)
             startActivity(intent)
