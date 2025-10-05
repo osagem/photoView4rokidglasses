@@ -43,6 +43,8 @@ import androidx.media3.common.MediaItem as ExoMediaItem
 import kotlinx.coroutines.launch
 import android.os.Handler
 import android.os.Looper
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.Player
 
 class PhotoListActivity : AppCompatActivity() {
@@ -111,6 +113,18 @@ class PhotoListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_photo_list)
+
+        // 让内容布局扩展到系统栏（状态栏和导航栏）后面
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 获取 WindowInsetsController
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window, window.decorView) ?: return
+        // 隐藏状态栏和导航栏
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        // 设置交互行为：当从屏幕边缘滑动时，系统栏会短暂显示
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // --- 结束全屏代码 ---
 
         // 设置窗口
         setupWindowInsets()

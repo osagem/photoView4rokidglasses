@@ -12,6 +12,8 @@ import android.widget.TextView
 import android.view.View
 import android.animation.ObjectAnimator
 import android.content.Intent
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +39,18 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // 让内容布局扩展到系统栏（状态栏和导航栏）后面
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 获取 WindowInsetsController
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window, window.decorView) ?: return
+        // 隐藏状态栏和导航栏
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        // 设置交互行为：当从屏幕边缘滑动时，系统栏会短暂显示
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // --- 结束全屏代码 ---
 
         // 获取 TextView 实例
         sloganTextView = findViewById(R.id.main_slogan)
